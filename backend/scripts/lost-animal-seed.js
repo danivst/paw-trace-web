@@ -1,4 +1,6 @@
-import { LostAnimal } from '../models/lost-animal.js';
+import sequelize from "../config/db.js";
+import { LostAnimal } from "../models/lost-animal.js";
+
 const dummyLostAnimals = [
   {
     name: 'Bella',
@@ -132,17 +134,25 @@ const dummyLostAnimals = [
   }
 ];
 
-async function seed() {
+async function seedLostAnimals() {
   try {
-    for (const animal of dummyLostAnimals) {
-      await LostAnimal.create(animal);
-    }
-    console.log('Dummy lost_animals inserted successfully!');
+    console.log("Connecting to database...");
+    await sequelize.authenticate();
+    console.log("Database connected!");
+
+    console.log("Syncing models...");
+    await sequelize.sync();
+    console.log("Models synced!");
+
+    console.log("Inserting lost animals...");
+    await LostAnimal.bulkCreate(dummyLostAnimals);
+    console.log("Lost animals inserted successfully!");
+
     process.exit(0);
   } catch (err) {
-    console.error('Error inserting dummy data:', err);
+    console.error("Error inserting lost animals:", err);
     process.exit(1);
   }
 }
 
-seed();
+seedLostAnimals();
