@@ -1,6 +1,10 @@
 import User from "../models/user.js";
 import LostAnimal from "../models/lost-animal.js";
 import FoundAnimal from "../models/found-animal.js";
+import {
+  updateUserById,
+  deleteUserById,
+} from "../services/user-service.js";
 
 export const getAllUsers = async (req, res) => {
   try {
@@ -21,6 +25,27 @@ export const getUserById = async (req, res) => {
     });
     if (!user) return res.status(404).json({ error: "User not found" });
     res.json(user);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+export const updateUser = async (req, res) => {
+  try {
+    const updated = await updateUserById(req.params.id, req.body);
+    if (!updated) return res.status(404).json({ error: "User not found" });
+
+    res.json({ message: "User updated successfully" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+export const deleteUser = async (req, res) => {
+  try {
+    const deleted = await deleteUserById(req.params.id);
+    if (!deleted) return res.status(404).json({ error: "User not found" });
+    res.json({ message: "User deleted successfully" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

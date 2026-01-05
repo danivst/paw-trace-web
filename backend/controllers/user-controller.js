@@ -1,11 +1,13 @@
-import User from "../models/user.js";
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
+import {
+  registerUser,
+  loginUser,
+  updateUserById,
+  deleteUserById,
+} from "../services/user-service.js";
 
 export const register = async (req, res) => {
   try {
-    const hashedPassword = await bcrypt.hash(req.body.password, 10);
-    const user = await User.create({ ...req.body, password: hashedPassword });
+    const user = await registerUser(req.body);
     res.status(201).json({ message: "User created", id: user.id });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -14,17 +16,16 @@ export const register = async (req, res) => {
 
 export const login = async (req, res) => {
   try {
-    const user = await User.findOne({ where: { email: req.body.email } });
-    if (!user) return res.status(404).json({ error: "User not found" });
+    const { user, token } = await loginUser({
+      email: req.body.email,
+      password: req.body.password,
+    });
 
-    const match = await bcrypt.compare(req.body.password, user.password);
-    if (!match) return res.status(403).json({ error: "Wrong password" });
-
-    const token = jwt.sign(
-      { id: user.id, role: user.role },
-      process.env.JWT_SECRET || "secretkey",
-      { expiresIn: "7d" }
-    );
+    if (!user) {
+      return res
+        .status(401)
+        .json({ error: "Invalid email or password" });
+    }
 
     res.json({ message: "Login successful", token });
   } catch (err) {
@@ -34,12 +35,7 @@ export const login = async (req, res) => {
 
 export const updateUser = async (req, res) => {
   try {
-    const { name, email, phone, password } = req.body;
-    const updateData = { name, email, phone };
-
-    if (password) updateData.password = await bcrypt.hash(password, 10);
-
-    const [updated] = await User.update(updateData, { where: { id: req.params.id } });
+    const updated = await updateUserById(req.params.id, req.body);
     if (!updated) return res.status(404).json({ error: "User not found" });
 
     res.json({ message: "User updated successfully" });
@@ -50,7 +46,7 @@ export const updateUser = async (req, res) => {
 
 export const deleteUser = async (req, res) => {
   try {
-    const deleted = await User.destroy({ where: { id: req.params.id } });
+    const deleted = await deleteUserById(req.params.id);
     if (!deleted) return res.status(404).json({ error: "User not found" });
     res.json({ message: "User deleted successfully" });
   } catch (err) {

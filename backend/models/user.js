@@ -1,6 +1,5 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../config/db.js";
-import bcrypt from "bcrypt";
 
 const User = sequelize.define(
   "User",
@@ -10,21 +9,15 @@ const User = sequelize.define(
     email: { type: DataTypes.STRING, allowNull: false, unique: true },
     phone: { type: DataTypes.STRING },
     password: { type: DataTypes.STRING, allowNull: false },
-    role: { type: DataTypes.ENUM("user", "admin"), allowNull: false, defaultValue: "user" },
+    role: {
+      type: DataTypes.ENUM("user", "admin"),
+      allowNull: false,
+      defaultValue: "user",
+    },
   },
   {
     tableName: "users",
     timestamps: false,
-    hooks: {
-      async beforeCreate(user) {
-        user.password = await bcrypt.hash(user.password, 10);
-      },
-      async beforeUpdate(user) {
-        if (user.changed("password")) {
-          user.password = await bcrypt.hash(user.password, 10);
-        }
-      },
-    },
   }
 );
 
