@@ -81,7 +81,7 @@ Administrators can:
 | Category | Technology |
 |-----------|-------------|
 | Frontend | HTML, CSS, JavaScript |
-| Backend | Node.js with Express |
+| Backend | Node.js with Express and Sequelize |
 | Database | MySQL |
 | Development Environment | Visual Studio Code |
 | Hosting | Render |
