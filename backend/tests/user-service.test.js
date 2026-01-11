@@ -46,8 +46,11 @@ const {
 } = await import("../services/user-service.js");
 
 const User = (await import("../models/user.js")).default;
-const bcrypt = await import("bcrypt");
-const jwt = await import("jsonwebtoken");
+const bcryptModule = await import("bcrypt");
+const jwtModule = await import("jsonwebtoken");
+
+const bcrypt = bcryptModule.default;
+const jwt = jwtModule.default;
 
 describe("user-service", () => {
   beforeEach(() => {

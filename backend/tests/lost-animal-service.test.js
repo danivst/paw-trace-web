@@ -1,6 +1,5 @@
 import { jest } from "@jest/globals";
 
-// Mock the LostAnimal model
 jest.unstable_mockModule("../models/lost-animal.js", () => {
   const mockModel = {
     create: jest.fn(),
