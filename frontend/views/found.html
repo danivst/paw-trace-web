@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+  <meta charset="UTF-8">
+  <title>Намерени животни</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <h1>Намерени животни</h1>
+  <div id="found-list"></div>
+
+  <script>
+  fetch('/api/found')
+    .then(r => r.json())
+    .then(data => {
+      document.getElementById('found-list').innerHTML = data.map(a => `
+        <div class="animal-card">
+          <img src="${JSON.parse(a.images)[0]}" alt="${a.type}">
+          <p>${a.type} - ${a.found_location}</p>
+        </div>
+      `).join('');
+    });
+  </script>
+</body>
+</html>

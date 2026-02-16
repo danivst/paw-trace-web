@@ -1,0 +1,19 @@
+<form id="registerForm">
+  <input name="name" placeholder="Име" required />
+  <input name="email" placeholder="Имейл" required />
+  <input name="phone" placeholder="Телефон" required />
+  <input name="password" placeholder="Парола" type="password" required />
+  <button>Регистрация</button>
+</form>
+
+<script>
+document.getElementById('registerForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(e.target).entries());
+  const res = await fetch('/api/users/register', {
+    method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data)
+  });
+  const msg = await res.json();
+  alert(msg.message);
+});
+</script>

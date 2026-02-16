@@ -1,35 +1,22 @@
-import express from "express";
-import cors from "cors";
-import sequelize from "./db.js";
+import express from 'express';
+import cors from 'cors';
 
-import lostAnimalRoutes from "../routes/lost-animal-routes.js";
-import foundAnimalRoutes from "../routes/found-animal-routes.js";
-import userRoutes from "../routes/user-routes.js";
-import adminRoutes from "../routes/admin-routes.js";
+import lostRoutes from './routes/lostRoutes.js';
+import foundRoutes from './routes/foundRoutes.js';
+import userRoutes from './routes/userRoutes.js';
 
 const app = express();
+
 app.use(cors());
 app.use(express.json());
-app.use(express.static("public"));
+app.use(express.static('public'));
 
-app.use("/api/lost-animals", lostAnimalRoutes);
-app.use("/api/found-animals", foundAnimalRoutes);
-app.use("/api/users", userRoutes);
-app.use("/api/admin", adminRoutes);
+app.use('/api/lost', lostRoutes);
+app.use('/api/found', foundRoutes);
+app.use('/api/users', userRoutes);
 
-// connect to db
-(async () => {
-  try {
-    await sequelize.authenticate();
-    console.log("MySQL Connected");
+const PORT = 5000;
 
-    await sequelize.sync();
-    console.log("Models synced");
-  } catch (err) {
-    console.error("DB Error:", err);
-  }
-})();
-
-app.listen(5000, () =>
-  console.log("Server running on http://localhost:5000")
-);
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});

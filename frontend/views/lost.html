@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+  <meta charset="UTF-8">
+  <title>Изгубени животни</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <h1>Изгубени животни</h1>
+  <div id="lost-list"></div>
+
+  <script>
+  fetch('/api/lost')
+    .then(r => r.json())
+    .then(data => {
+      document.getElementById('lost-list').innerHTML = data.map(a => `
+        <div class="animal-card">
+          <img src="${JSON.parse(a.images)[0]}" alt="${a.name}">
+          <p><b>${a.name || a.type}</b> - ${a.last_seen_location}</p>
+        </div>
+      `).join('');
+    });
+  </script>
+</body>
+</html>

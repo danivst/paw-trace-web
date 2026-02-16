@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Paw Trace Map</title>
+  <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY"></script>
+</head>
+<body>
+  <div id="map" style="height:90vh;"></div>
+  <script>
+  async function initMap() {
+    const map = new google.maps.Map(document.getElementById('map'), { zoom: 10, center: {lat: 42.7, lng: 23.3} });
+    const res = await fetch('/api/animals');
+    const animals = await res.json();
+    animals.forEach(a => {
+      const marker = new google.maps.Marker({
+        position: {lat: parseFloat(a.location.split(',')[0]), lng: parseFloat(a.location.split(',')[1])},
+        map, title: `${a.type} (${a.status})`
+      });
+    });
+  }
+  initMap();
+  </script>
+</body>
+</html>
