@@ -9,15 +9,32 @@ const FoundAnimal = sequelize.define(
       autoIncrement: true,
       primaryKey: true,
     },
+
     type: { type: DataTypes.STRING, allowNull: false },
+
     breed: { type: DataTypes.STRING },
     gender: { type: DataTypes.STRING },
     color: { type: DataTypes.STRING },
     age: { type: DataTypes.STRING },
+
     found_location: { type: DataTypes.STRING },
+
+    latitude: {
+      type: DataTypes.FLOAT,
+      allowNull: true
+    },
+
+    longitude: {
+      type: DataTypes.FLOAT,
+      allowNull: true
+    },
+
     date_time: { type: DataTypes.DATE, allowNull: false },
+
     images: { type: DataTypes.JSON, defaultValue: [] },
+
     description: { type: DataTypes.TEXT },
+
     user_id: { type: DataTypes.INTEGER, allowNull: false },
   },
   {

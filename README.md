@@ -82,7 +82,21 @@ Administrators can:
 |-----------|-------------|
 | Frontend | HTML, CSS, JavaScript |
 | Backend | Node.js with Express and Sequelize |
-| Database | MySQL |
+| Database | MySQL (configurable; can fall back to SQLite via `DB_DIALECT=sqlite`) |
 | Development Environment | Visual Studio Code |
 | Hosting | Render |
 | Maps | Google Maps API |
+
+## Running the Frontend
+
+1. Make sure the backend server is running on port 5001 (this is the default).  If you don't have MySQL installed you can use SQLite instead by setting the environment variable `DB_DIALECT=sqlite` (the database file will be created automatically as `pawtrace.sqlite` in the project root).2. The HTML pages for the user interface are located in `frontend/views` and are served automatically by the Express server at the root path (`/`).
+   - Visit `http://localhost:5001/` in your browser to open the home page.
+   - Other pages are available at `/found.html`, `/lost.html`, `/map.html`, and `/register.html`.
+   - The map page (`/map.html`) pulls data from a combined endpoint (`/api/animals`).
+3. Styles are defined in a baby‑blue themed CSS file and are loaded via `/css/style.css`.
+
+> **Map notes:** The project now uses [Leaflet](https://leafletjs.com/) with OpenStreetMap tiles, so **no API key is required**. The `map.html` page includes Leaflet via CDN.
+>
+> The `npm install leaflet react-leaflet` command you ran in the `frontend` folder only adds those packages to a local `node_modules` directory. The current static HTML pages don’t use them; to leverage the packages you’d need a build step (e.g. bundling a React app). For simple usage, keep the CDN links in `map.html` as shown.
+
+Feel free to experiment with the forms on the "Found" and "Lost" pages to add new entries.

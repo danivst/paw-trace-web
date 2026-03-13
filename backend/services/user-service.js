@@ -46,6 +46,11 @@ export const updateUserById = async (id, data) => {
   return updated;
 };
 
+export const getUserById = async (id) => {
+  const user = await User.findByPk(id);
+  return user;
+};
+
 export const deleteUserById = async (id) => {
   const deleted = await User.destroy({ where: { id } });
   return deleted;

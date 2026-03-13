@@ -1,19 +1,107 @@
-<form id="registerForm">
-  <input name="name" placeholder="Име" required />
-  <input name="email" placeholder="Имейл" required />
-  <input name="phone" placeholder="Телефон" required />
-  <input name="password" placeholder="Парола" type="password" required />
-  <button>Регистрация</button>
-</form>
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+  <meta charset="UTF-8">
+  <title>Регистрация - Paw Trace</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header>
+    <nav id="main-nav">
+      <a href="/index.html">Начало</a>
+      <span id="auth-links">
+        <a href="#" id="loginLink">Вход</a>
+      </span>
+    </nav>
+  </header>
+  <div class="container">
+    <h1>Създай профил</h1>
+    <form id="registerForm">
+      <input name="name" placeholder="Име" required />
+      <input name="email" placeholder="Имейл" required />
+      <input name="phone" placeholder="Телефон" required />
+      <input name="password" placeholder="Парола" type="password" required />
+      <button>Регистрация</button>
+    </form>
+  </div>
 
-<script>
-document.getElementById('registerForm').addEventListener('submit', async e => {
-  e.preventDefault();
-  const data = Object.fromEntries(new FormData(e.target).entries());
-  const res = await fetch('/api/users/register', {
-    method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data)
+  <script>
+  // beautiful toast notification
+  function showPopup(message, type = 'error') {
+    let container = document.getElementById('toast-container');
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'toast-container';
+      container.className = 'toast-container';
+      document.body.appendChild(container);
+    }
+    const toast = document.createElement('div');
+    toast.className = 'toast-message ' + (type || 'error');
+    const iconSpan = document.createElement('span');
+    iconSpan.className = 'toast-icon';
+    iconSpan.textContent = type === 'success' ? '✔️' : '⚠️';
+    const textSpan = document.createElement('span');
+    textSpan.className = 'toast-text';
+    textSpan.textContent = message;
+    toast.appendChild(iconSpan);
+    toast.appendChild(textSpan);
+    container.appendChild(toast);
+    setTimeout(() => {
+      toast.style.animation = 'toast-fade-out 0.4s ease-in forwards';
+      setTimeout(() => toast.remove(), 450);
+    }, 2500);
+  }
+
+  function updateNav() {
+    const authSpan = document.getElementById('auth-links');
+    authSpan.innerHTML = '';
+    const token = localStorage.getItem('token');
+    if (token) {
+      authSpan.innerHTML = `
+        <a href="/account.html">Акаунт</a>
+        <a href="#" id="logoutLink">Изход</a>
+      `;
+      document.getElementById('logoutLink').addEventListener('click', () => {
+        localStorage.clear();
+        window.location.href = '/index.html';
+      });
+    } else {
+      authSpan.innerHTML = `
+        <a href="/register.html">Регистрация</a>
+        <a href="/index.html" id="loginLink">Вход</a>
+      `;
+      // loginLink simply navigates to home where the form lives
+      document.getElementById('loginLink').addEventListener('click', () => {
+        window.location.href = '/';
+      });
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', updateNav);
+
+  document.getElementById('registerForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const data = Object.fromEntries(new FormData(e.target).entries());
+    try {
+      const res = await fetch('/api/users/register', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+      });
+      const msg = await res.json();
+      if (!res.ok) {
+        showPopup(msg.error || msg.message || JSON.stringify(msg), 'error');
+      } else {
+        let text = msg.message || 'Успешна регистрация';
+        if (msg.id) text += ' | Вашето потребителско ID е ' + msg.id;
+        showPopup(text, 'success');
+        e.target.reset();
+      }
+    } catch (err) {
+      showPopup('Грешка при връзка: ' + err.message, 'error');
+    }
   });
-  const msg = await res.json();
-  alert(msg.message);
-});
-</script>
+  </script>
+  
+</body>
+</html>

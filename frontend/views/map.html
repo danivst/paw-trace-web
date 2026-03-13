@@ -1,24 +1,180 @@
 <!DOCTYPE html>
-<html>
+<html lang="bg">
 <head>
-  <title>Paw Trace Map</title>
-  <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY"></script>
+  <meta charset="UTF-8">
+  <title>Карта - Paw Trace</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <!-- Leaflet files served locally -->
+  <link rel="stylesheet" href="/leaflet/leaflet.css" />
+  <script src="/leaflet/leaflet.js"></script>
 </head>
 <body>
-  <div id="map" style="height:90vh;"></div>
+  <header>
+<nav id="main-nav" class="navbar navbar-light" style="background: rgba(255,255,255,0.95); box-shadow:0 2px 10px rgba(0,0,0,0.1);">
+
+<div class="container-fluid px-4">
+
+<a class="navbar-brand fw-bold" href="/index.html" style="color:#667eea;font-size:1.5rem;">
+🐾 Paw Trace
+</a>
+
+<div class="ms-auto d-flex gap-3">
+
+<a href="/index.html">Начало</a>
+<a href="/found.html">Намерени</a>
+<a href="/lost.html">Изгубени</a>
+<a href="/map.html">Карта</a>
+<a href="/account.html">Акаунт</a>
+<a href="#" id="logoutLink">Изход</a>
+</div>
+
+</div>
+
+</nav>
+</header>
+  <div class="container">
+    <h1>Карта на животни</h1>
+    <div id="map">
+      <p id="map-status">Зареждане на картата…</p>
+    </div>
+    <div class="mt-3" style="display:flex; gap:16px; align-items:center;">
+      <span class="hint" style="margin-bottom:0;">Легенда:</span>
+      <span class="hint" style="display:flex; align-items:center; gap:6px;">
+        <span style="display:inline-block; width:12px; height:12px; border-radius:999px; background:#e74c3c;"></span>
+        Изгубено животно
+      </span>
+      <span class="hint" style="display:flex; align-items:center; gap:6px;">
+        <span style="display:inline-block; width:12px; height:12px; border-radius:999px; background:#2ecc71;"></span>
+        Намерено животно
+      </span>
+    </div>
+  </div>
+
   <script>
-  async function initMap() {
-    const map = new google.maps.Map(document.getElementById('map'), { zoom: 10, center: {lat: 42.7, lng: 23.3} });
-    const res = await fetch('/api/animals');
-    const animals = await res.json();
-    animals.forEach(a => {
-      const marker = new google.maps.Marker({
-        position: {lat: parseFloat(a.location.split(',')[0]), lng: parseFloat(a.location.split(',')[1])},
-        map, title: `${a.type} (${a.status})`
+  // beautiful toast notification
+  function showPopup(message, type = 'error') {
+    let container = document.getElementById('toast-container');
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'toast-container';
+      container.className = 'toast-container';
+      document.body.appendChild(container);
+    }
+    const toast = document.createElement('div');
+    toast.className = 'toast-message ' + (type || 'error');
+    const iconSpan = document.createElement('span');
+    iconSpan.className = 'toast-icon';
+    iconSpan.textContent = type === 'success' ? '✔️' : '⚠️';
+    const textSpan = document.createElement('span');
+    textSpan.className = 'toast-text';
+    textSpan.textContent = message;
+    toast.appendChild(iconSpan);
+    toast.appendChild(textSpan);
+    container.appendChild(toast);
+    setTimeout(() => {
+      toast.style.animation = 'toast-fade-out 0.4s ease-in forwards';
+      setTimeout(() => toast.remove(), 450);
+    }, 2500);
+  }
+
+  function updateNav() {
+    const authSpan = document.getElementById('auth-links');
+    authSpan.innerHTML = '';
+    const token = localStorage.getItem('token');
+    if (token) {
+      authSpan.innerHTML = `
+        <a href="/account.html">Акаунт</a>
+        <a href="#" id="logoutLink">Изход</a>
+      `;
+      document.getElementById('logoutLink').addEventListener('click', e => {
+        e.preventDefault();
+        localStorage.clear();
+        window.location.href = '/';
       });
+    } else {
+      authSpan.innerHTML = `
+        <a href="#" id="loginLink">Вход</a>
+      `;
+      document.getElementById('loginLink').addEventListener('click', () => {
+        window.location.href = '/';
+      });
+    }
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    updateNav();
+    if (!localStorage.getItem('token')) {
+      window.location.href = '/';
+    }
+  });
+  async function initMap() {
+    const statusEl = document.getElementById('map-status');
+    try {
+      if (typeof L === 'undefined') throw new Error('Leaflet library failed to load');
+
+      // initialize Leaflet map centered on Bulgaria
+      const map = L.map('map').setView([42.7, 23.3], 10);
+
+      // add OpenStreetMap tile layer
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+      }).addTo(map);
+
+      // hide status immediately after map created
+      if (statusEl) statusEl.style.display = 'none';
+
+      const res = await fetch('/api/animals');
+      if (!res.ok) throw new Error('Failed to load animals');
+      const animals = await res.json();
+      animals.forEach(a => {
+      if (!a.latitude || !a.longitude) return;
+
+      const lat = parseFloat(a.latitude);
+      const lng = parseFloat(a.longitude);
+
+      if (a.latitude === null || a.longitude === null) return;
+
+      const isLost = a.last_seen_location !== undefined && a.last_seen_location !== null;
+      const color = isLost ? '#e74c3c' : '#2ecc71';
+      const title = a.name || a.type;
+      const locationText = a.last_seen_location || a.found_location || '';
+      const date = a.date_time 
+        ? new Date(a.date_time).toLocaleDateString('bg-BG') 
+        : '';
+
+      L.circleMarker([lat, lng], {
+        radius: 10,
+        color,
+        fillColor: color,
+        fillOpacity: 0.9,
+        weight: 2
+      })
+        .addTo(map)
+        .bindPopup(`
+          <div style="min-width:200px;">
+            <strong>${isLost ? 'Изгубено' : 'Намерено'}:</strong> ${title}<br/>
+            <span>${locationText}</span><br/>
+            <small>${date}</small>
+          </div>
+        `);
     });
+    } catch (err) {
+      console.error('map init error', err);
+      if (statusEl) statusEl.textContent = 'Грешка при зареждане на картата: ' + err.message;
+      showPopup('Не можа да се зареди картата: ' + err.message, 'error');
+    }
   }
   initMap();
+
+  const logout=document.getElementById("logoutLink");
+
+  if(logout){
+  logout.onclick=e=>{
+  e.preventDefault();
+  localStorage.clear();
+  window.location.href="/index.html";
+  };
+  }
   </script>
 </body>
 </html>

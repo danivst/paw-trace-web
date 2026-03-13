@@ -1,0 +1,215 @@
+/* baby-blue theme for Paw Trace
+   shared styles for forms, cards, nav, etc. */
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: #e0f7ff; /* light baby blue */
+  color: #333;
+}
+
+header, nav {
+  background: #ffffff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  padding: 10px 20px;
+}
+
+nav a {
+  margin-right: 15px;
+  text-decoration: none;
+  color: #0077cc;
+  font-weight: 500;
+}
+
+nav a:hover {
+  color: #005fa3;
+}
+
+.container {
+  max-width: 900px;
+  margin: 30px auto;
+  padding: 0 20px;
+}
+
+h1 {
+  margin-top: 0;
+  color: #0077cc;
+}
+
+/* form styling */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  background: #fff;
+  padding: 25px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+input, select, textarea, button {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+button {
+  background: #0077cc;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #005fa3;
+}
+
+/* animal cards */
+.animal-card {
+  background: linear-gradient(145deg, #ffffff, #f3f9ff);
+  border-radius: 18px;
+  box-shadow: 
+    0 12px 30px rgba(0, 119, 204, 0.15),
+    0 4px 10px rgba(0, 0, 0, 0.06);
+  padding: 20px;
+  transition: all 0.35s ease;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.animal-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 
+    0 22px 50px rgba(0, 119, 204, 0.25),
+    0 8px 18px rgba(0, 0, 0, 0.08);
+}
+
+.animal-card img {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin-bottom: 12px;
+}
+
+.animal-card img {
+  height: 80px;
+  width: 80px;
+  object-fit: cover;
+}
+
+.animal-card p {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.form-section {
+  margin-bottom: 30px;
+}
+
+.form-section h2 {
+  margin-bottom: 10px;
+  color: #005fa3;
+}
+
+/* map page fix */
+#map {
+  width: 100%;
+  height: 80vh;
+  border: 2px solid #0077cc;
+  border-radius: 6px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+
+.animal-card-title {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #005fa3;
+}
+
+.animal-card-location {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.animal-card-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: bold;
+  letter-spacing: 0.05em;
+  background: #e74c3c;
+  color: white;
+}
+
+.animal-card--found .animal-card-badge {
+  background: #2ecc71;
+}
+
+/* grid container for cards */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 10px; /* разстояние между картите */
+  margin-top: 50px;
+}
+
+/* нов фон на картите */
+.animal-card {
+  background: linear-gradient(135deg, #f0f9ff, #dff3ff);
+  border: 1px solid rgba(0, 119, 204, 0.15);
+}
+
+#toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.toast-message {
+  background: white;
+  border-radius: 12px;
+  padding: 12px 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  animation: toast-slide-in 0.35s ease;
+}
+
+.toast-message.success {
+  border-left: 5px solid #2ecc71;
+}
+
+.toast-message.error {
+  border-left: 5px solid #e74c3c;
+}
+
+.toast-icon {
+  font-size: 18px;
+}
+
+.toast-text {
+  font-size: 14px;
+}
+
+@keyframes toast-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}

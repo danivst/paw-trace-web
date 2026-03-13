@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Paw Trace - Начало</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+
+</head>
+<body>
+
+<header>
+<nav id="main-nav" class="navbar navbar-light" style="background: rgba(255,255,255,0.95); box-shadow:0 2px 10px rgba(0,0,0,0.1);">
+<div class="container-fluid px-4">
+
+<a class="navbar-brand fw-bold" href="/index.html" style="color:#667eea;font-size:1.5rem;">
+🐾 Paw Trace
+</a>
+
+<div id="auth-links" class="ms-auto d-flex gap-3"></div>
+
+</div>
+</nav>
+</header>
+
+
+<div style="display:flex;align-items:center;justify-content:center;min-height:calc(100vh - 80px);">
+<div id="main-content" class="container-fluid px-5" style="width:100%;margin-top:1%;"></div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+
+function showPopup(message,type='error'){
+let container=document.getElementById('toast-container');
+
+if(!container){
+container=document.createElement('div');
+container.id='toast-container';
+container.className='toast-container';
+document.body.appendChild(container);
+}
+
+const toast=document.createElement('div');
+toast.className='toast-message '+type;
+toast.textContent=message;
+
+container.appendChild(toast);
+
+setTimeout(()=>{
+toast.remove();
+},2500);
+}
+
+
+
+function updateNav(){
+
+const auth=document.getElementById('auth-links');
+
+const token=localStorage.getItem('token');
+const role=localStorage.getItem('role');
+
+
+if(token && role==='admin'){
+
+auth.innerHTML=`
+<a href="/admin.html" class="btn btn-warning btn-sm">Admin</a>
+<a href="#" id="logoutLink" class="btn btn-danger btn-sm">Изход</a>
+`;
+
+}
+
+else if(token){
+
+auth.innerHTML=`
+<a href="/index.html">Начало</a>
+      <a href="/found.html">Намерени</a>
+      <a href="/lost.html">Изгубени</a>
+      <a href="/map.html">Карта</a>
+      <a href="/account.html">Акаунт</a>
+      <a href="#" id="logoutLink">Изход</a>
+`;
+
+}
+
+else{
+
+auth.innerHTML=`
+<a href="#" id="showRegister" class="btn btn-outline-primary btn-sm">Регистрация</a>
+<a href="#" id="loginLink" class="btn btn-primary btn-sm">Вход</a>
+`;
+
+document.getElementById("loginLink").onclick=e=>{
+e.preventDefault();
+showLoginForm();
+};
+
+document.getElementById("showRegister").onclick=e=>{
+e.preventDefault();
+showRegisterForm();
+};
+
+}
+
+const logout=document.getElementById("logoutLink");
+
+if(logout){
+logout.onclick=e=>{
+e.preventDefault();
+localStorage.clear();
+window.location.href="/index.html";
+};
+}
+
+}
+
+
+
+async function showAnnouncements(){
+
+const data=await fetch('/api/animals').then(r=>r.json()).catch(()=>[]);
+
+const container=document.getElementById('main-content');
+
+container.innerHTML=`
+
+<div class="hero-section text-center mb-5">
+
+<h1 style="font-size:3rem;">🐾 Paw Trace</h1>
+
+<p style="max-width:600px;margin:auto;color:#555;">
+Платформа, която помага на хората да намерят изгубени домашни любимци
+и да съобщят за намерени животни.
+</p>
+
+<div class="mt-4 d-flex justify-content-center gap-3 flex-wrap">
+
+<a href="/lost.html" class="btn btn-danger btn-lg">Изгубено животно</a>
+<a href="/found.html" class="btn btn-success btn-lg">Намерено животно</a>
+<a href="/map.html" class="btn btn-primary btn-lg">Карта</a>
+
+</div>
+
+</div>
+
+
+<h2 class="text-center mb-4">Последни обяви</h2>
+
+<div id="animals" class="d-flex flex-wrap justify-content-center gap-4"></div>
+
+`;
+
+const animals=document.getElementById("animals");
+
+if(!data.length){
+animals.innerHTML="<p>Няма обяви</p>";
+return;
+}
+
+data.slice(0,6).forEach(a=>{
+
+const isLost=a.last_seen_location!==undefined;
+
+const title=isLost?(a.name||a.type):a.type;
+
+const loc=isLost?a.last_seen_location:a.found_location;
+
+const badge=isLost?"Изгубено":"Намерено";
+
+const color=isLost?"#ff4d4d":"#4caf50";
+
+animals.innerHTML+=`
+
+<div style="
+width:200px;
+background:white;
+border-radius:12px;
+padding:15px;
+box-shadow:0 4px 12px rgba(0,0,0,0.1);
+text-align:center;
+position:relative;
+">
+
+<span style="
+position:absolute;
+top:10px;
+right:10px;
+background:${color};
+color:white;
+padding:3px 7px;
+border-radius:6px;
+font-size:12px;
+">
+${badge}
+</span>
+
+<h5 style="margin-top:20px;">${title}</h5>
+
+<p style="color:#555;font-size:14px;">
+${loc||""}
+</p>
+
+</div>
+
+`;
+
+});
+
+}
+
+
+
+function showLoginForm(){
+
+document.getElementById('main-content').innerHTML=`
+
+<div class="floating-form">
+
+<h2>Вход</h2>
+
+<form id="loginForm">
+
+<input name="email" placeholder="Имейл" required>
+
+<input name="password" placeholder="Парола" type="password" required>
+
+<button>Влез</button>
+
+<p class="hint">
+<a href="#" id="switchRegister">Регистрация</a>
+</p>
+
+</form>
+
+</div>
+
+`;
+
+document.getElementById("switchRegister").onclick=e=>{
+e.preventDefault();
+showRegisterForm();
+};
+
+document.getElementById("loginForm").onsubmit=async e=>{
+
+e.preventDefault();
+
+const data=Object.fromEntries(new FormData(e.target).entries());
+
+const res=await fetch('/api/users/login',{
+method:'POST',
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify(data)
+});
+
+const msg=await res.json();
+
+if(!res.ok){
+showPopup(msg.error || "Грешка");
+return;
+}
+
+localStorage.setItem("token",msg.token);
+localStorage.setItem("userId",msg.user.id);
+localStorage.setItem("role",msg.user.role);
+
+if(msg.user.role==="admin"){
+window.location.href="/admin.html";
+return;
+}
+
+renderPage();
+
+};
+
+}
+
+
+
+function showRegisterForm(){
+
+document.getElementById('main-content').innerHTML=`
+
+<div class="floating-form">
+
+<h2>Регистрация</h2>
+
+<form id="registerForm">
+
+<input name="name" placeholder="Име" required>
+<input name="email" placeholder="Имейл" required>
+<input name="phone" placeholder="Телефон" required>
+<input name="password" type="password" placeholder="Парола" required>
+
+<button>Регистрирай се</button>
+
+<p class="hint">
+<a href="#" id="switchLogin">Вход</a>
+</p>
+
+</form>
+
+</div>
+
+`;
+
+document.getElementById("switchLogin").onclick=e=>{
+e.preventDefault();
+showLoginForm();
+};
+
+document.getElementById("registerForm").onsubmit=async e=>{
+
+e.preventDefault();
+
+const data=Object.fromEntries(new FormData(e.target).entries());
+
+const res=await fetch('/api/users/register',{
+method:'POST',
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify(data)
+});
+
+const msg=await res.json();
+
+if(!res.ok){
+showPopup(msg.error || "Грешка");
+return;
+}
+
+showPopup("Успешна регистрация","success");
+
+setTimeout(showLoginForm,1500);
+
+};
+
+}
+
+
+
+function renderPage(){
+
+updateNav();
+
+showAnnouncements();
+
+}
+
+
+
+document.addEventListener("DOMContentLoaded",renderPage);
+
+</script>
+
+</body>
+</html>

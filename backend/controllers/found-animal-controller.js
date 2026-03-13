@@ -8,8 +8,34 @@ import {
 
 export const createFoundAnimal = async (req, res) => {
   try {
-    const animal = await createFoundAnimalService(req.body);
-    res.status(201).json({ message: "Animal added", id: animal.id });
+
+    const {
+      type,
+      found_location,
+      date_time,
+      images,
+      description,
+      user_id,
+      latitude,
+      longitude
+    } = req.body;
+
+    const animal = await createFoundAnimalService({
+      type,
+      found_location,
+      date_time,
+      images,
+      description,
+      user_id,
+      latitude,
+      longitude
+    });
+
+    res.status(201).json({
+      message: "Animal added",
+      id: animal.id
+    });
+
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

@@ -7,12 +7,13 @@ export const createLostAnimal = async (data) => {
 };
 
 export const getLostAnimals = async (filters = {}) => {
-  const { type, location, date } = filters;
+  const { type, location, date, user_id } = filters;
   const where = {};
 
   if (type) where.type = type;
   if (location) where.last_seen_location = { [Op.like]: `%${location}%` };
   if (date) where.date_time = date;
+  if (user_id) where.user_id = user_id;
 
   const animals = await LostAnimal.findAll({
     where,
